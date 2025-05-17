@@ -1,25 +1,22 @@
 import React from 'react';
-import logo from './logo.svg';
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { Dashboard } from './components/Dashboard/Dashboard';
+import { darkTheme } from './theme/darkTheme';
+import '@fontsource/inter/300.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
+        <Dashboard />
+      </div>
+    </ThemeProvider>
   );
 }
 
