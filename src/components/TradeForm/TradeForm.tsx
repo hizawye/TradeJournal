@@ -15,12 +15,14 @@ import { useDispatch } from 'react-redux';
 import AddIcon from '@mui/icons-material/Add';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import { useAuth } from '../../contexts/AuthContext';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import { addTrade } from '../../store/tradesSlice';
 import { Trade, TradeFormData } from '../../types/trade';
 
 export const TradeForm: React.FC = () => {
   const dispatch = useDispatch();
+  const { currentUser } = useAuth();
   const [showSuccess, setShowSuccess] = useState(false);
   const [formData, setFormData] = useState<TradeFormData>({
     symbol: '',
@@ -38,14 +40,38 @@ export const TradeForm: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const trade: Trade = {
-      ...formData,
-      id: generateTradeId(),
-      entryPrice: Number(formData.entryPrice),
-      exitPrice: Number(formData.exitPrice),
-      quantity: Number(formData.quantity),
+    const entryPrice = Number(formData.entryPrice);
+    const exitPrice = Number(formData.exitPrice);
+    const quantity = Number(formData.quantity);
+    
+    // Calculate P&L and P&L percentage
+    const pnl = formData.type === 'LONG' 
+      ? (exitPrice - entryPrice) * quantity
+      : (entryPrice - exitPrice) * quantity;
+    
+    const pnlPercentage = formData.type === 'LONG'
+      ? ((exitPrice - entryPrice) / entryPrice) * 100
+      : ((entryPrice - exitPrice) / entryPrice) * 100;
+
+    if (!currentUser) {
+      console.error('No user logged in');
+      return;
+    }
+
+    const tradeData: Omit<Trade, 'id'> = {
+      symbol: formData.symbol,
+      type: formData.type,
+      entryPrice,
+      exitPrice,
+      quantity,
+      date: formData.date,
+      notes: formData.notes,
+      pnl,
+      pnlPercentage,
     };
-    dispatch(addTrade(trade));
+    
+    // The dispatch is typed as any to handle the async thunk action
+    (dispatch as any)(addTrade({ userId: currentUser.uid, tradeData }));
     setShowSuccess(true);
     
     // Reset form

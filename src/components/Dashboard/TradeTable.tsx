@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -11,6 +11,12 @@ import {
   Tooltip,
   Typography,
   Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -19,16 +25,32 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import EventIcon from '@mui/icons-material/Event';
 import NotesIcon from '@mui/icons-material/Notes';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../store';
-import { removeTrade } from '../../store/tradesSlice';
+import { RootState, AppDispatch } from '../../store';
+import { deleteTrade } from '../../store/tradesSlice';
 import { Trade } from '../../types/trade';
 
 export const TradeTable: React.FC = () => {
   const trades = useSelector((state: RootState) => state.trades.trades);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [tradeToDelete, setTradeToDelete] = useState<string | null>(null);
 
-  const handleDelete = (id: string) => {
-    dispatch(removeTrade(id));
+  const handleDeleteClick = (id: string) => {
+    setTradeToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (tradeToDelete) {
+      dispatch(deleteTrade(tradeToDelete));
+    }
+    setDeleteDialogOpen(false);
+    setTradeToDelete(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setTradeToDelete(null);
   };
 
   return (
@@ -93,7 +115,7 @@ export const TradeTable: React.FC = () => {
                   <Tooltip title="Delete trade">
                     <IconButton
                       size="small"
-                      onClick={() => handleDelete(trade.id)}
+                      onClick={() => trade.id && handleDeleteClick(trade.id)}
                       color="error"
                     >
                       <DeleteIcon />
@@ -105,6 +127,27 @@ export const TradeTable: React.FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Delete Trade"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this trade? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel}>Cancel</Button>
+          <Button onClick={handleDeleteConfirm} color="error" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

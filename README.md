@@ -2,6 +2,12 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Environment Setup
+
+1. Copy `.env.example` to `.env`
+2. Fill in your Firebase Admin SDK credentials in `.env`
+3. Never commit `.env` file to version control
+
 ## Available Scripts
 
 In the project directory, you can run:
